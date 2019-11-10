@@ -1,13 +1,14 @@
 class RabbitService
   class << self
-    def start
+    def start(queue_name)
+      @queue_name = queue_name
       subscribe_to_queue
     end
 
     private
 
       def queue
-        @queue ||= channel.queue('', exclusive: true)
+        @queue ||= channel.queue(@queue_name)
       end
 
       def xchange
@@ -22,11 +23,12 @@ class RabbitService
         @connection ||= Bunny.new.tap(&:start)
       end
 
-      def subscribe_to_queue
-        queue.subscribe do |_delivery_info, properties, item_name|
+      def subscribe_to_queue(queue_name)
+        queue(queue_name).subscribe do |_delivery_info, properties, item_name|
           xchange.publish(
             CalcService.calc_cost(item_name),
-            routing_key: properties.reply_to
+            routing_key: properties.reply_to,
+            correlation_id: properties.correlation_id
           )
         end
       end
