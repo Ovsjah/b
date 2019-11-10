@@ -23,8 +23,8 @@ class RabbitService
         @connection ||= Bunny.new.tap(&:start)
       end
 
-      def subscribe_to_queue(queue_name)
-        queue(queue_name).subscribe do |_delivery_info, properties, item_name|
+      def subscribe_to_queue
+        queue.subscribe do |_delivery_info, properties, item_name|
           xchange.publish(
             CalcService.calc_cost(item_name),
             routing_key: properties.reply_to,
