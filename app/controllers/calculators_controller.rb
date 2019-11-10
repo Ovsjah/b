@@ -1,5 +1,5 @@
 class CalculatorsController < ApplicationController
   def calc
-    CostCalc.start
+    RabbitService.start
   end
 end
